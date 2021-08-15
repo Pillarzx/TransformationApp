@@ -1,25 +1,18 @@
 package com.sz.transformation.view;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.ActionBar;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.sz.transformation.R;
 import com.sz.transformation.base.BaseActivity;
-import com.sz.transformation.base.BasePresenter;
 import com.sz.transformation.databinding.ActivityMainBinding;
 import com.sz.transformation.util.ImageLoader;
-
-import java.util.HashMap;
 
 public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBinding> implements View.OnClickListener {
 
     private boolean isStateBarVisiable = true;
-
+    private long mLastClickTransformTime;
 
     @Override
     public int initLayout() {
@@ -43,7 +36,12 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
                         if (isStateBarVisiable) {
                             hideSystemUI();
                         }
-                        switchState(true);
+                        if (System.currentTimeMillis() - mLastClickTransformTime < 5 * 1000) {
+                            Toast.makeText(getContext(), R.string.do_not_call_ultraman_too_often, Toast.LENGTH_SHORT).show();
+                        } else {
+                            mLastClickTransformTime = System.currentTimeMillis();
+                            switchState(true);
+                        }
                         break;
                     case MotionEvent.ACTION_UP:
                         switchState(false);
@@ -65,10 +63,10 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
                         // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
                         if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                             //The system bars are visible.
-                            isStateBarVisiable=true;
+                            isStateBarVisiable = true;
                         } else {
                             // The system bars are NOT visible.
-                            isStateBarVisiable=false;
+                            isStateBarVisiable = false;
                         }
                     }
                 });

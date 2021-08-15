@@ -35,7 +35,7 @@ public class MainPresenter extends BasePresenter<MainActivity> {
     }
 
     public void stopSound() {
-        if (mSoundId.get(soundId) != null) {
+        if (tempSoundId!=0) {
             mSoundPool.stop(tempSoundId);
             tempSoundId=0;
         }
