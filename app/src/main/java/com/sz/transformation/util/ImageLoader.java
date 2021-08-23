@@ -3,8 +3,12 @@ package com.sz.transformation.util;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.TransitionOptions;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
 import com.sz.transformation.R;
 
 /**
@@ -50,6 +54,22 @@ public class ImageLoader {
         Glide.with(imageView.getContext())
                 .load(path)
                 .fallback(R.drawable.ic_head_photo)
+                .into(imageView);
+    }
+
+    /**
+     * 使用渐变效果加载图片
+     * @param path
+     * @param imageView
+     * @param <T>
+     */
+    public static <T> void loadImageWithTransition(T path,ImageView imageView){
+        DrawableCrossFadeFactory factory =
+                new DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build();
+        Glide.with(imageView.getContext())
+                .load(path)
+                .transition(DrawableTransitionOptions.withCrossFade(factory))
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(imageView);
     }
 }

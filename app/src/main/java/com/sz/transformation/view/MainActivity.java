@@ -93,9 +93,13 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
         if (isOpen) {
             getPresenter().playSound(MainPresenter.SOUND_TRANSFORM);
             ImageLoader.loadBigImage(R.drawable.pic_sparklence_on, getBinding().ivBg);
+            getBinding().ivBg2.postDelayed(()-> ImageLoader.loadImageWithTransition(R.drawable.pic_sparklence_light_on, getBinding().ivBg2)
+                                          , 1000
+            );
         } else {
             getPresenter().stopSound();
             ImageLoader.loadBigImage(R.drawable.pic_sparklence_off, getBinding().ivBg);
+            getBinding().ivBg2.setImageDrawable(null);
         }
     }
 
