@@ -1,15 +1,27 @@
 package com.sz.transformation.view;
 
+import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.hjq.permissions.OnPermissionCallback;
+import com.hjq.permissions.Permission;
+import com.hjq.permissions.XXPermissions;
+import com.huawei.hiai.asr.AsrConstants;
+import com.huawei.hiai.asr.AsrListener;
 import com.sz.transformation.R;
 import com.sz.transformation.base.BaseActivity;
+import com.sz.transformation.bean.SpeechRecognitionBean;
 import com.sz.transformation.databinding.ActivityMainBinding;
 import com.sz.transformation.util.ImageLoader;
+import com.sz.transformation.util.SpeechRecognition;
 
-public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBinding> implements View.OnClickListener {
+import java.util.List;
+
+public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBinding> implements View.OnClickListener, AsrListener {
 
     private boolean isStateBarVisiable = true;
     private long mLastClickTransformTime;
@@ -26,7 +38,8 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
 
     @Override
     public void setView() {
-
+        requestPermission();
+        SpeechRecognition.init(this,this);
         switchState(getPresenter().getOpeningState());
         getBinding().ivBg.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -73,6 +86,26 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
 
     }
 
+    private void requestPermission() {
+        XXPermissions.with(this)
+                .permission(Permission.RECORD_AUDIO)
+                .request(new OnPermissionCallback() {
+                    @Override
+                    public void onGranted(List<String> permissions, boolean all) {
+
+                    }
+
+                    @Override
+                    public void onDenied(List<String> permissions, boolean never) {
+                        if (never){
+                            XXPermissions.startPermissionActivity(MainActivity.this,permissions);
+                        }else {
+                            Toast.makeText(MainActivity.this,"麦克风权限获取失败",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         hideSystemUI();
@@ -91,6 +124,7 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
 
     public void switchState(boolean isOpen) {
         if (isOpen) {
+            SpeechRecognition.getInstance().startListening();
             getPresenter().playSound(MainPresenter.SOUND_TRANSFORM);
             ImageLoader.loadBigImage(R.drawable.pic_sparklence_on, getBinding().ivBg);
             getBinding().ivBg2.postDelayed(()-> ImageLoader.loadImageWithTransition(R.drawable.pic_sparklence_light_on, getBinding().ivBg2)
@@ -130,4 +164,77 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // 语音识别
+    ///////////////////////////////////////////////////////////////////////////
+    @Override
+    public void onInit(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onBeginningOfSpeech() {
+
+    }
+
+    @Override
+    public void onRmsChanged(float v) {
+
+    }
+
+    @Override
+    public void onBufferReceived(byte[] bytes) {
+
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+
+    }
+
+    @Override
+    public void onError(int i) {
+
+    }
+
+    @Override
+    public void onResults(Bundle bundle) {
+        //最终结果
+        String json=bundle.getString(AsrConstants.RESULTS_RECOGNITION);
+        Log.d("test",String.format("识别结果json===>%s",json));
+        Gson gson=new Gson();
+        SpeechRecognitionBean bean=gson.fromJson(json, SpeechRecognitionBean.class);
+//        bean.getResult().stream().map();
+
+    }
+
+    @Override
+    public void onPartialResults(Bundle bundle) {
+
+    }
+
+    @Override
+    public void onEnd() {
+
+    }
+
+    @Override
+    public void onEvent(int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onLexiconUpdated(String s, int i) {
+
+    }
+
+    @Override
+    public void onRecordStart() {
+
+    }
+
+    @Override
+    public void onRecordEnd() {
+
+    }
 }
