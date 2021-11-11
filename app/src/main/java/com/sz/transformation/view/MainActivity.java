@@ -10,18 +10,16 @@ import com.google.gson.Gson;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
-import com.huawei.hiai.asr.AsrConstants;
-import com.huawei.hiai.asr.AsrListener;
 import com.sz.transformation.R;
 import com.sz.transformation.base.BaseActivity;
 import com.sz.transformation.bean.SpeechRecognitionBean;
 import com.sz.transformation.databinding.ActivityMainBinding;
 import com.sz.transformation.util.ImageLoader;
-import com.sz.transformation.util.SpeechRecognition;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBinding> implements View.OnClickListener, AsrListener {
+public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBinding> implements View.OnClickListener {
 
     private boolean isStateBarVisiable = true;
     private long mLastClickTransformTime;
@@ -39,7 +37,6 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
     @Override
     public void setView() {
         requestPermission();
-        SpeechRecognition.init(this,this);
         switchState(getPresenter().getOpeningState());
         getBinding().ivBg.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -97,10 +94,10 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
 
                     @Override
                     public void onDenied(List<String> permissions, boolean never) {
-                        if (never){
-                            XXPermissions.startPermissionActivity(MainActivity.this,permissions);
-                        }else {
-                            Toast.makeText(MainActivity.this,"麦克风权限获取失败",Toast.LENGTH_SHORT).show();
+                        if (never) {
+                            XXPermissions.startPermissionActivity(MainActivity.this, permissions);
+                        } else {
+                            Toast.makeText(MainActivity.this, "麦克风权限获取失败", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -124,11 +121,13 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
 
     public void switchState(boolean isOpen) {
         if (isOpen) {
-            SpeechRecognition.getInstance().startListening();
+            Log.d("test", "开始记录语音");
             getPresenter().playSound(MainPresenter.SOUND_TRANSFORM);
             ImageLoader.loadBigImage(R.drawable.pic_sparklence_on, getBinding().ivBg);
-            getBinding().ivBg2.postDelayed(()-> ImageLoader.loadImageWithTransition(R.drawable.pic_sparklence_light_on, getBinding().ivBg2)
-                                          , 1000
+            getBinding().ivBg2.postDelayed(() -> {
+                        Log.d("test", "停止记录，开始识别");
+                    }
+                    , 2000
             );
         } else {
             getPresenter().stopSound();
@@ -167,74 +166,15 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
     ///////////////////////////////////////////////////////////////////////////
     // 语音识别
     ///////////////////////////////////////////////////////////////////////////
-    @Override
-    public void onInit(Bundle bundle) {
 
-    }
-
-    @Override
-    public void onBeginningOfSpeech() {
-
-    }
-
-    @Override
-    public void onRmsChanged(float v) {
-
-    }
-
-    @Override
-    public void onBufferReceived(byte[] bytes) {
-
-    }
-
-    @Override
-    public void onEndOfSpeech() {
-
-    }
-
-    @Override
-    public void onError(int i) {
-
-    }
-
-    @Override
     public void onResults(Bundle bundle) {
         //最终结果
-        String json=bundle.getString(AsrConstants.RESULTS_RECOGNITION);
-        Log.d("test",String.format("识别结果json===>%s",json));
-        Gson gson=new Gson();
-        SpeechRecognitionBean bean=gson.fromJson(json, SpeechRecognitionBean.class);
-//        bean.getResult().stream().map();
-
-    }
-
-    @Override
-    public void onPartialResults(Bundle bundle) {
-
-    }
-
-    @Override
-    public void onEnd() {
-
-    }
-
-    @Override
-    public void onEvent(int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onLexiconUpdated(String s, int i) {
-
-    }
-
-    @Override
-    public void onRecordStart() {
-
-    }
-
-    @Override
-    public void onRecordEnd() {
-
+        String json = bundle.getString("result");
+        Log.d("test", String.format("识别结果json===>%s", json));
+        Gson gson = new Gson();
+        SpeechRecognitionBean bean = gson.fromJson(json, SpeechRecognitionBean.class);
+        if (bean.getResult().stream().map(p->p.getWord().equals("测试")).collect(Collectors.toList()).contains("测试")) {
+            ImageLoader.loadImageWithTransition(R.drawable.pic_sparklence_light_on, getBinding().ivBg2);
+        }
     }
 }
