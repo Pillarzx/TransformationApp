@@ -1,25 +1,26 @@
 package com.sz.transformation.view;
 
-import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 import com.sz.transformation.R;
 import com.sz.transformation.base.BaseActivity;
-import com.sz.transformation.bean.SpeechRecognitionBean;
 import com.sz.transformation.databinding.ActivityMainBinding;
+import com.sz.transformation.util.Const;
 import com.sz.transformation.util.ImageLoader;
+import com.sz.transformation.util.SpeechRecognizerHelper;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBinding> implements View.OnClickListener {
+import edu.cmu.pocketsphinx.Hypothesis;
+import edu.cmu.pocketsphinx.RecognitionListener;
+
+public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBinding> implements View.OnClickListener, RecognitionListener {
 
     private boolean isStateBarVisiable = true;
     private long mLastClickTransformTime;
@@ -36,6 +37,7 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
 
     @Override
     public void setView() {
+        SpeechRecognizerHelper.init(this,this);
         requestPermission();
         switchState(getPresenter().getOpeningState());
         getBinding().ivBg.setOnTouchListener(new View.OnTouchListener() {
@@ -122,10 +124,12 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
     public void switchState(boolean isOpen) {
         if (isOpen) {
             Log.d("test", "开始记录语音");
+            SpeechRecognizerHelper.getInstance().startListening(SpeechRecognizerHelper.MENU_SEARCH);
             getPresenter().playSound(MainPresenter.SOUND_TRANSFORM);
             ImageLoader.loadBigImage(R.drawable.pic_sparklence_on, getBinding().ivBg);
             getBinding().ivBg2.postDelayed(() -> {
                         Log.d("test", "停止记录，开始识别");
+                        SpeechRecognizerHelper.getInstance().stop();
                     }
                     , 2000
             );
@@ -163,18 +167,50 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SpeechRecognizerHelper.getInstance().cancel();
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // 语音识别
     ///////////////////////////////////////////////////////////////////////////
 
-    public void onResults(Bundle bundle) {
+    @Override
+    public void onBeginningOfSpeech() {
+
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+
+    }
+
+    @Override
+    public void onPartialResult(Hypothesis hypothesis) {
+
+    }
+
+    @Override
+    public void onResult(Hypothesis hypothesis) {
         //最终结果
-        String json = bundle.getString("result");
-        Log.d("test", String.format("识别结果json===>%s", json));
-        Gson gson = new Gson();
-        SpeechRecognitionBean bean = gson.fromJson(json, SpeechRecognitionBean.class);
-        if (bean.getResult().stream().map(p->p.getWord().equals("测试")).collect(Collectors.toList()).contains("测试")) {
-            ImageLoader.loadImageWithTransition(R.drawable.pic_sparklence_light_on, getBinding().ivBg2);
+        if (hypothesis != null) {
+            String text = hypothesis.getHypstr();
+            Log.d("test", String.format("识别结果text===>%s", text));
+            if (text.equals(Const.COMMAND_DIGA)) {
+                ImageLoader.loadImageWithTransition(R.drawable.pic_sparklence_light_on, getBinding().ivBg2);
+            }
         }
+    }
+
+    @Override
+    public void onError(Exception e) {
+
+    }
+
+    @Override
+    public void onTimeout() {
+
     }
 }
