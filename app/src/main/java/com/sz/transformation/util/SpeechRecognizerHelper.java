@@ -1,6 +1,7 @@
 package com.sz.transformation.util;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.File;
@@ -21,26 +22,50 @@ public class SpeechRecognizerHelper {
     private SpeechRecognizer mRecognizer;
     private WeakReference<Context> mContext;
     public static final String MENU_SEARCH = "menu";
+    private static final String KWS_SEARCH = "wakeup";
+    private static OnDoneListener onDoneListener;
 
-    private SpeechRecognizerHelper(Context context,RecognitionListener listener) {
+    private SpeechRecognizerHelper(Context context) {
         mContext = new WeakReference<>(context);
-        ThreadPool.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Assets assets = new Assets(mContext.get());
-                    File assetDir = assets.syncAssets();
-                    setupRecognizer(assetDir,listener);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        new SetTask(mContext.get(),onDoneListener).execute();
     }
 
-    public static void init(Context context,RecognitionListener listener) {
+    private static class SetTask extends AsyncTask<Void, Void, Exception> {
+        private final WeakReference<Context> imContext;
+        private final OnDoneListener iOnDoneListener;
+
+        public SetTask(Context context,OnDoneListener listener){
+            imContext=new WeakReference<>(context);
+            iOnDoneListener =listener;
+        }
+        @Override
+        protected Exception doInBackground(Void... voids) {
+            try {
+                Assets assets = new Assets(imContext.get());
+                File assetDir = assets.syncAssets();
+                SpeechRecognizerHelper.getInstance().setupRecognizer(assetDir);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return e;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Exception e) {
+            Log.d("test", "SpeechRecognizer加载完毕");
+            iOnDoneListener.done();
+        }
+    }
+
+    public void setOnDoneListener(OnDoneListener listener) {
+        this.onDoneListener = listener;
+    }
+
+    public static void init(Context context,OnDoneListener listener) {
+        onDoneListener=listener;
         if (instance == null) {
-            instance = new SpeechRecognizerHelper(context,listener);
+            instance = new SpeechRecognizerHelper(context);
         }
     }
 
@@ -48,7 +73,7 @@ public class SpeechRecognizerHelper {
         return instance;
     }
 
-    private void setupRecognizer(File assetsDir,RecognitionListener listener) throws IOException {
+    private void setupRecognizer(File assetsDir) throws IOException {
         // The recognizer can be configured to perform multiple searches
         // of different kind and switch between them
 
@@ -57,8 +82,7 @@ public class SpeechRecognizerHelper {
                 .setDictionary(new File(assetsDir, "ptm-zh/0140.dic"))
                 .setRawLogDir(assetsDir) // To disable logging of raw audio comment out this call (takes a lot of space on the device)
                 .getRecognizer();
-        Log.d("test","SpeechRecognizer加载完毕");
-        mRecognizer.addListener(listener);
+
         /* In your application you might not need to add all those searches.
           They are added here for demonstration. You can leave just one.
          */
@@ -67,6 +91,7 @@ public class SpeechRecognizerHelper {
 //        mRecognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
 
         // Create grammar-based search for selection between demos
+        mRecognizer.addNgramSearch(KWS_SEARCH,new File(assetsDir, "ptm-zh/0140.lm"));
         File menuGrammar = new File(assetsDir, "menu.gram");
         mRecognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
 
@@ -92,5 +117,9 @@ public class SpeechRecognizerHelper {
             mRecognizer.cancel();
             mRecognizer.shutdown();
         }
+    }
+
+    public interface OnDoneListener {
+        void done();
     }
 }

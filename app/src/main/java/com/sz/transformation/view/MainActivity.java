@@ -37,7 +37,7 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
 
     @Override
     public void setView() {
-        SpeechRecognizerHelper.init(this,this);
+        SpeechRecognizerHelper.getInstance().addListener(this);
         requestPermission();
         switchState(getPresenter().getOpeningState());
         getBinding().ivBg.setOnTouchListener(new View.OnTouchListener() {
@@ -198,7 +198,7 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             Log.d("test", String.format("识别结果text===>%s", text));
-            if (text.equals(Const.COMMAND_DIGA)) {
+            if (text.equals(Const.COMMAND_CESHI)) {
                 ImageLoader.loadImageWithTransition(R.drawable.pic_sparklence_light_on, getBinding().ivBg2);
             }
         }
