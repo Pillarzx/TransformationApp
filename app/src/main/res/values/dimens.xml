@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="theme_column_padding">4dp</dimen>
+    <dimen name="theme_text_image_spacing">6dp</dimen>
+    <dimen name="theme_text_spacing">10dp</dimen>
+    <dimen name="theme_container_spacing">14dp</dimen>
+    <dimen name="theme_edittext_height">28dp</dimen>
+    <dimen name="theme_text_block_spacing">30dp</dimen>
+    <dimen name="theme_background_padding">32dp</dimen>
+    <dimen name="theme_toolbar_height">40dp</dimen>
+    <dimen name="theme_dialog_padding">50dp</dimen>
+    <!--主题字号-->
+    <dimen name="theme_text_size_small">12sp</dimen>
+    <dimen name="theme_text_size_large">22sp</dimen>
+</resources>

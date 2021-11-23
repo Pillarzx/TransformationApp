@@ -48,7 +48,7 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
                         if (isStateBarVisiable) {
                             hideSystemUI();
                         }
-                        if (System.currentTimeMillis() - mLastClickTransformTime < 5 * 1000) {
+                        if (System.currentTimeMillis() - mLastClickTransformTime < 3 * 1000) {
                             Toast.makeText(getContext(), R.string.do_not_call_ultraman_too_often, Toast.LENGTH_SHORT).show();
                         } else {
                             mLastClickTransformTime = System.currentTimeMillis();
@@ -126,7 +126,7 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
             Log.d("test", "开始记录语音");
             SpeechRecognizerHelper.getInstance().startListening(SpeechRecognizerHelper.MENU_SEARCH);
             getPresenter().playSound(MainPresenter.SOUND_TRANSFORM);
-            ImageLoader.loadBigImage(R.drawable.pic_sparklence_on, getBinding().ivBg);
+            ImageLoader.loadImage(R.drawable.pic_sparklence_on, getBinding().ivBg);
             getBinding().ivBg2.postDelayed(() -> {
                         Log.d("test", "停止记录，开始识别");
                         SpeechRecognizerHelper.getInstance().stop();
@@ -134,8 +134,9 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
                     , 2000
             );
         } else {
+            SpeechRecognizerHelper.getInstance().cancel();
             getPresenter().stopSound();
-            ImageLoader.loadBigImage(R.drawable.pic_sparklence_off, getBinding().ivBg);
+            ImageLoader.loadImage(R.drawable.pic_sparklence_off, getBinding().ivBg);
             getBinding().ivBg2.setImageDrawable(null);
         }
     }
@@ -170,7 +171,7 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SpeechRecognizerHelper.getInstance().cancel();
+        SpeechRecognizerHelper.getInstance().release();
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -198,7 +199,7 @@ public class MainActivity extends BaseActivity<MainPresenter, ActivityMainBindin
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             Log.d("test", String.format("识别结果text===>%s", text));
-            if (text.equals(Const.COMMAND_CESHI)) {
+            if (text.equals(Const.COMMAND_CHANGE)) {
                 ImageLoader.loadImageWithTransition(R.drawable.pic_sparklence_light_on, getBinding().ivBg2);
             }
         }

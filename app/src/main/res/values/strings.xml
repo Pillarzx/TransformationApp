@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Transformer</string>
-    <string name="do_not_call_ultraman_too_often">不要太频繁地召唤迪迦！</string>
+    <string name="do_not_call_ultraman_too_often">不要频繁开关，休息一下！</string>
+    <string name="searching">搜寻中...</string>
 </resources>

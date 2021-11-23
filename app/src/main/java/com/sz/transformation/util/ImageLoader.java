@@ -3,7 +3,6 @@ package com.sz.transformation.util;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.TransitionOptions;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -43,14 +42,14 @@ public class ImageLoader {
      * @param path
      * @param imageView
      */
-    public static <T> void loadBigImage(T path, ImageView imageView, int roundRadius) {
+    public static <T> void loadImage(T path, ImageView imageView, int roundRadius) {
         Glide.with(imageView.getContext())
                 .load(path)
                 .fallback(R.drawable.ic_head_photo)
                 .apply(RequestOptions.bitmapTransform(new RoundedCorners(roundRadius)))
                 .into(imageView);
     }
-    public static <T> void loadBigImage(T path, ImageView imageView) {
+    public static <T> void loadImage(T path, ImageView imageView) {
         Glide.with(imageView.getContext())
                 .load(path)
                 .fallback(R.drawable.ic_head_photo)

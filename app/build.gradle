@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.sz.transformation"
-        minSdkVersion 21
+        minSdkVersion 22
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -44,4 +44,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.9'
     // 权限请求框架：https://github.com/getActivity/XXPermissions
     implementation 'com.github.getActivity:XXPermissions:12.8'
+    //雷达扫描动画
+    implementation 'com.github.Pillarzx:RadarScanView:1.2.0'
+    implementation 'com.ldoublem.loadingview:loadingviewlib:1.0'
 }

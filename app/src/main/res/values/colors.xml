@@ -3,4 +3,13 @@
     <color name="colorPrimary">#323232</color>
     <color name="colorPrimaryDark">#151515</color>
     <color name="colorAccent">#595959</color>
+    <color name="textSecondary">#23d7ff</color>
+    <color name="textThemeDark">#191d23</color>
+    <color name="textThemeLight">#6B89EC</color>
+    <color name="textOrangeDark">#CC3900</color>
+    <color name="textRed">#ff3232</color>
+    <color name="transparent">#00000000</color>
+    <color name="alpha">#00000000</color>
+    <color name="alphaLight">#07000000</color>
+    <color name="white">#ffffff</color>
 </resources>

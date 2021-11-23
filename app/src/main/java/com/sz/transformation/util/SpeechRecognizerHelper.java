@@ -27,17 +27,18 @@ public class SpeechRecognizerHelper {
 
     private SpeechRecognizerHelper(Context context) {
         mContext = new WeakReference<>(context);
-        new SetTask(mContext.get(),onDoneListener).execute();
+        new SetTask(mContext.get(), onDoneListener).execute();
     }
 
     private static class SetTask extends AsyncTask<Void, Void, Exception> {
         private final WeakReference<Context> imContext;
         private final OnDoneListener iOnDoneListener;
 
-        public SetTask(Context context,OnDoneListener listener){
-            imContext=new WeakReference<>(context);
-            iOnDoneListener =listener;
+        public SetTask(Context context, OnDoneListener listener) {
+            imContext = new WeakReference<>(context);
+            iOnDoneListener = listener;
         }
+
         @Override
         protected Exception doInBackground(Void... voids) {
             try {
@@ -62,10 +63,12 @@ public class SpeechRecognizerHelper {
         this.onDoneListener = listener;
     }
 
-    public static void init(Context context,OnDoneListener listener) {
-        onDoneListener=listener;
+    public static void init(Context context, OnDoneListener listener) {
+        onDoneListener = listener;
         if (instance == null) {
             instance = new SpeechRecognizerHelper(context);
+        } else {
+            onDoneListener.done();
         }
     }
 
@@ -91,7 +94,7 @@ public class SpeechRecognizerHelper {
 //        mRecognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
 
         // Create grammar-based search for selection between demos
-        mRecognizer.addNgramSearch(KWS_SEARCH,new File(assetsDir, "ptm-zh/0140.lm"));
+        mRecognizer.addNgramSearch(KWS_SEARCH, new File(assetsDir, "ptm-zh/0140.lm"));
         File menuGrammar = new File(assetsDir, "menu.gram");
         mRecognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
 
@@ -102,23 +105,47 @@ public class SpeechRecognizerHelper {
         return this;
     }
 
+    /**
+     * 开始记录语音
+     * @param searchName
+     * @return
+     */
     public SpeechRecognizerHelper startListening(String searchName) {
         mRecognizer.startListening(searchName, 5000);
         return this;
     }
 
+    /**
+     * 停止录音，开始识别
+     * @return
+     */
     public SpeechRecognizerHelper stop() {
         mRecognizer.stop();
         return this;
     }
 
-    public void cancel() {
+    /**
+     * 取消识别
+     * @return
+     */
+    public SpeechRecognizerHelper cancel() {
+        mRecognizer.cancel();
+        return this;
+    }
+
+    /**
+     * 释放
+     */
+    public void release() {
         if (mRecognizer != null) {
             mRecognizer.cancel();
             mRecognizer.shutdown();
         }
     }
 
+    /**
+     * 初始化状态监听器
+     */
     public interface OnDoneListener {
         void done();
     }
